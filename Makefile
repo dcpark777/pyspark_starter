@@ -14,4 +14,5 @@ clean:
 build:
 	mkdir ./dist/
 	cp ./src/main.py ./dist/
+	cp ./src/shared/log4j.properties ./dist/
 	cd ./src && zip -x main.py -r ../dist/jobs.zip .

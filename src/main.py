@@ -1,14 +1,12 @@
-import argparse
-import importlib
 import os
 import sys
 import time
 from collections import deque
-
-from pyspark.sql import SparkSession
-from pyspark import SparkConf, SparkContext
-
 from shared.logging import Log4j
+from settings.job_factory import JobFactory
+from settings.command_lines import CommandLine
+from settings.spark_configuration import SparkConfiguration
+
 
 if os.path.exists('jobs.zip'):
     sys.path.insert(0, 'jobs.zip')
@@ -24,16 +22,26 @@ except:
 
 
 if __name__ == '__main__':
-    print("IN THE MAIN")
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--job_name', required=True)
-    args = parser.parse_known_args()
-    job_name = args[0].job_name
-    forward_args = deque(args[1])
-    print(job_name)
+    # Capture all arguments except python script name `main.py`
+    args = sys.argv[1:]
+    command_line = CommandLine()
+    # Parse BaseCommandLine and SparkCommandLine arguments
+    command_line_args = command_line.parse_known_args(args)
+    print(command_line_args)
+    job_name = command_line_args[0].job_name
+    job_type = command_line_args[0].job_type
+    # job_args is a list of arguments that have not yet been parsed
+    # These arguments are job-specific
+    job_args = deque(command_line_args[1])
+    print(f"Initializing Job Type: {job_type}")
+    print(f"Job Name: {job_name}")
+    print(f"Provided Arguments: {args}")
 
-    forward_args.extendleft([job_name, '--job_name'])
-    print(forward_args)
-
-    job_module = importlib.import_module('jobs.%s.%s' % (job_name, job_name))
-    job_module.main(forward_args)
+    # Initialize SparkSession using args parsed by SparkCommandLine
+    spark = SparkConfiguration.configure_spark_session(vars(command_line_args[0]))
+    # Initialize Log4J
+    log = Log4j(spark)
+    # Get Job and run
+    job = JobFactory.get_job(job_type, spark, log, args)
+    job.run()
+    spark.stop()

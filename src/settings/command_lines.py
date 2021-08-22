@@ -1,11 +1,13 @@
 from argparse import ArgumentParser
 
 
+
 class BaseCommandLine(ArgumentParser):
     """CommandLine parser for arguments required by all jobs."""
     def __init__(self):
         super(BaseCommandLine, self).__init__()
         self.job_name = self.add_argument('--job_name', required=True)
+        self.job_type = self.add_argument('--job_type', required=True)
         self.environment = self.add_argument('--environment', required=True)
         self.region = self.add_argument('--region', required=True)
 
@@ -17,4 +19,8 @@ class SparkCommandLine(ArgumentParser):
         self.spark_executor_cores = self.add_argument('--spark_executor_cores', required=False, type=int, default=4)
         self.spark_executor_memory = self.add_argument('--spark_executor_memory', required=False, type=str, default='15g')
 
+
+class CommandLine(BaseCommandLine, SparkCommandLine):
+    def __init__(self):
+        super(CommandLine, self).__init__()
 
