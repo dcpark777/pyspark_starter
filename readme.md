@@ -4,3 +4,5 @@
 4. spark-submit --deploy-mode client --py-files jobs.zip main.py
 5. spark-submit --deploy-mode client --py-files jobs.zip main.py --job_name reconciler --environment qa
 
+Run Tests from root directory:
+`coverage run --source=src/ -m pytest -v tests/ && coverage report -m`

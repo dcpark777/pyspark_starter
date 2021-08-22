@@ -13,5 +13,3 @@ class JobFactory:
 
         if job_type == "ReconcilerJob":
             return ReconcilerJob(spark, log, job_args)
-        else:
-            raise ValueError(f'Invalid JobType provided: {job_type}')
